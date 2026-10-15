@@ -28,7 +28,7 @@ world_progress = true           # in-game day, bosses and milestones from the wo
 boss_dates_from_backups = true  # date bosses defeated before the first run, using /valheim/backups
 mod_news = true                 # news when mods or the Valheim version change
 config_watch = true             # news when the mod settings below change after a restart
-epicloot = "auto"               # enchantments section: true, false or "auto" (when EpicLoot is installed)
+epicloot = false                # EpicLoot enchantments section: set to true to show it (needs EpicLoot on the server)
 
 [discord]
 # Set the webhook with the DISCORD_WEBHOOK_URL environment variable.

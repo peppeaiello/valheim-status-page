@@ -36,7 +36,7 @@ DEFAULTS = {
         "boss_dates_from_backups": True,  # date bosses defeated before the first run, using backups
         "mod_news": True,                 # news entry when mods or the Valheim version change
         "config_watch": True,             # news entry when watched mod settings change after a restart
-        "epicloot": "auto",               # enchantments section: true / false / "auto" (if EpicLoot is installed)
+        "epicloot": False,                # enchantments section, opt-in: shown only if true AND EpicLoot is installed
     },
     "discord": {
         # The webhook URL is a secret: set it with the DISCORD_WEBHOOK_URL environment variable.

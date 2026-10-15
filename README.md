@@ -14,7 +14,7 @@ One small container, added next to your server, that shows your players what is 
 - **World progression** *(experimental)*: in-game day, defeated bosses with the day they fell, milestones.
 - **News feed**: mods added, removed or updated; mod settings that changed after a restart; bosses defeated; your own announcements.
 - **Discord**: new entries posted to a channel through a webhook, with the Gale profile code to import after mod changes.
-- **EpicLoot enchantments** *(if installed)*: every enchantment with its official description and the items it can roll on, with search and filters.
+- **EpicLoot enchantments** *(optional, off by default)*: if your server runs EpicLoot, you can show every enchantment with its official description and the items it can roll on, with search and filters. Turn it on with `features.epicloot = true`.
 - **World map**: embed your map (e.g. ValheimWebMap) if you have one.
 
 Everything is read-only: the status page never changes your server's files.
@@ -53,7 +53,7 @@ All options are documented in [config.example.toml](config.example.toml). The mo
 | `server.world` | World name; leave empty to auto-detect when there is only one |
 | `page.title`, `page.subtitle`, `page.join_hint` | Texts at the top of the page |
 | `page.map_url` | URL of a web map to embed |
-| `features.*` | Turn each section on or off |
+| `features.*` | Turn each section on or off (the EpicLoot section is off unless you enable it) |
 | `[[config_watch]]` | Mod settings to watch; changes are announced after the next restart |
 
 Environment variables override the file: `HUGINN_URL`, `WORLD_NAME`, `DISCORD_WEBHOOK_URL`, `GALE_CODE`, `TZ`.
@@ -81,7 +81,7 @@ The container runs nginx and a small Python worker (standard library only). The 
 | `data/status.json` | status, players, mods, next restart | 10 s |
 | `data/stats.json` | world progression, leaderboard | 1 min |
 | `data/news.json` | news feed | 1 min |
-| `data/enchantments.json` | EpicLoot enchantments | 6 h |
+| `data/enchantments.json` | EpicLoot enchantments (only if enabled) | 6 h |
 
 Its own state (play time, news, Discord history) is kept in `/data`.
 

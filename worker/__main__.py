@@ -79,14 +79,21 @@ def main():
 
             if now - last_ench >= 6 * 3600:
                 last_ench = now
-                ench = cfg["features"]["epicloot"]
-                if ench is True or (ench == "auto" and epicloot.installed(paths["server"])):
-                    try:
-                        effects = epicloot.build(paths["server"])
-                        if effects:
-                            save_json(os.path.join(web, "enchantments.json"), {"updated_at": now, "effects": effects})
-                    except Exception as e:
-                        log(f"epicloot: {e}")
+                ench_file = os.path.join(web, "enchantments.json")
+                effects = None
+                # Opt-in: shown only when enabled in config.toml AND EpicLoot is installed
+                if cfg["features"]["epicloot"] is True:
+                    if epicloot.installed(paths["server"]):
+                        try:
+                            effects = epicloot.build(paths["server"])
+                        except Exception as e:
+                            log(f"epicloot: {e}")
+                    else:
+                        log("epicloot: enabled in config.toml, but EpicLoot is not installed on the server")
+                if effects:
+                    save_json(ench_file, {"updated_at": now, "effects": effects})
+                elif os.path.exists(ench_file):
+                    os.remove(ench_file)            # section turned off or mod removed: hide it
 
             save_json(os.path.join(web, "site.json"), {
                 "page": cfg["page"],
