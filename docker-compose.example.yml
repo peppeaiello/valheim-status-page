@@ -1,0 +1,33 @@
+# Example: valheim-status-page next to an mbround18/valheim server.
+# Keep your own valheim service as it is; only the volume paths must match.
+
+services:
+  valheim:
+    image: mbround18/valheim:latest
+    # ... your existing configuration (ports, environment, ...)
+    volumes:
+      - ./valheim/saves:/home/steam/.config/unity3d/IronGate/Valheim
+      - ./valheim/server:/home/steam/valheim
+      - ./valheim/backups:/home/steam/backups
+
+  status-page:
+    build: https://github.com/peppeaiello/valheim-status-page.git
+    container_name: valheim-status-page
+    restart: unless-stopped
+    depends_on:
+      - valheim
+    ports:
+      - "8080:80"
+    environment:
+      TZ: "Etc/UTC"                       # same time zone as the valheim service (for the restart time)
+      HUGINN_URL: "http://valheim:3000"
+      DISCORD_WEBHOOK_URL: ""             # optional
+    volumes:
+      # The server's files, read-only: the status page never changes your server
+      - ./valheim/saves:/valheim/saves:ro
+      - ./valheim/server:/valheim/server:ro
+      - ./valheim/backups:/valheim/backups:ro
+      # Your config.toml and announcements.json
+      - ./status-page/config:/config:ro
+      # Worker state (play time, news, Discord history)
+      - ./status-page/data:/data

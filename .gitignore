@@ -1,0 +1,10 @@
+# Local configuration and runtime data: never commit them
+/config/
+/data/
+/status-page/
+.env
+*.url
+
+# Python
+__pycache__/
+*.pyc

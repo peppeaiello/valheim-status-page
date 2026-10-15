@@ -1,0 +1,58 @@
+# valheim-status-page configuration.
+# Copy this file to config/config.toml and change what you need: every option
+# has a default, so an empty file works too. Secrets (the Discord webhook) go
+# in environment variables, not here.
+
+[server]
+# Huginn, the status server bundled with mbround18/valheim (HTTP_PORT, default 3000).
+# Inside the same Docker network the service name works: http://<valheim service>:3000
+huginn_url = "http://valheim:3000"
+# World to read progression from. Leave empty to auto-detect when there is only one.
+world = ""
+
+[page]
+# Empty title = the server name reported by Huginn.
+title = ""
+subtitle = "Valheim dedicated server"
+# Optional text under the online/offline badge, e.g. how to join.
+join_hint = ""
+# Optional map (e.g. ValheimWebMap) shown in an iframe. Must be reachable by your visitors.
+map_url = ""
+refresh_seconds = 15
+# Show a warning banner when the scheduled restart is this close.
+restart_warning_minutes = 30
+
+[features]
+leaderboard = true              # play time per player, from Huginn sessions
+world_progress = true           # in-game day, bosses and milestones from the world save (experimental)
+boss_dates_from_backups = true  # date bosses defeated before the first run, using /valheim/backups
+mod_news = true                 # news when mods or the Valheim version change
+config_watch = true             # news when the mod settings below change after a restart
+epicloot = "auto"               # enchantments section: true, false or "auto" (when EpicLoot is installed)
+
+[discord]
+# Set the webhook with the DISCORD_WEBHOOK_URL environment variable.
+# Empty username = the name you gave the webhook in Discord.
+username = ""
+# What to post: announcement, mods, settings, boss
+post = ["announcement", "mods", "settings", "boss"]
+# Gale profile code to show after mod changes. Empty = read it from the
+# GALE_SYNC_CODE download of mbround18/valheim, if you use it.
+gale_code = ""
+
+# Mod settings to watch. After each restart, changed values are listed in the news.
+# file: name of the .cfg in BepInEx/config, section: the [Section] without brackets.
+# unit: optional, e.g. "m", "%" or "×".
+#
+# [[config_watch]]
+# file = "randyknapp.mods.epicloot.cfg"
+# section = "2 - Balance"
+# key = "Global Drop Rate Modifier"
+# label = "EpicLoot magic item drop rate"
+# unit = "×"
+#
+# [[config_watch]]
+# file = "marcopogo.PlanBuild.cfg"
+# section = "Server Settings"
+# key = "Allow serverside blueprints"
+# label = "PlanBuild server blueprints"

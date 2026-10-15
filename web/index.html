@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Valheim server status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="runes">ᚹ ᚨ ᛚ ᚺ ᛖ ᛁ ᛗ</div>
+    <h1 id="server-name">Valheim</h1>
+    <div class="subtitle" id="subtitle">Valheim dedicated server</div>
+    <div id="pill" class="status-pill"><span class="dot"></span><span id="pill-text">Checking…</span></div>
+    <div class="join-hint" id="join-hint" hidden></div>
+  </header>
+
+  <section class="alerts" id="alerts"></section>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="label">Players</div>
+      <div class="value" id="players-count">–</div>
+      <div class="bar"><span id="players-bar"></span></div>
+    </div>
+    <div class="stat">
+      <div class="label">World</div>
+      <div class="value" id="world">–</div>
+    </div>
+    <div class="stat">
+      <div class="label">Version</div>
+      <div class="value" id="version">–</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mods</div>
+      <div class="value" id="mods-count">–</div>
+    </div>
+  </section>
+
+  <section class="panel progress-panel" id="progress-panel" hidden>
+    <h2>World progression <small id="world-saved"></small></h2>
+    <div class="progress-top">
+      <div class="day-box">
+        <div class="label">Day</div>
+        <div class="day" id="world-day">–</div>
+      </div>
+      <div class="progress-sum">
+        <div class="progress-line"><strong id="bosses-count">–</strong> bosses defeated</div>
+        <div class="bar"><span id="bosses-bar"></span></div>
+        <div class="next-boss" id="next-boss"></div>
+      </div>
+    </div>
+    <ol class="bosses" id="bosses-list"></ol>
+    <div class="milestones" id="milestones"></div>
+  </section>
+
+  <section class="grid">
+    <div class="panel">
+      <h2>Vikings online <small id="players-small"></small></h2>
+      <ul class="players" id="players-list"><li class="empty">Nobody right now</li></ul>
+
+      <div class="jobs" id="jobs" hidden>
+        <h2>Next restart</h2>
+        <div id="jobs-list"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Installed mods <small id="mods-small"></small></h2>
+      <input class="search" id="mod-search" type="search" placeholder="Search a mod…" aria-label="Search a mod">
+      <ul class="mods" id="mods-list"></ul>
+    </div>
+  </section>
+
+  <section class="panel board-panel" id="board-panel" hidden>
+    <h2>Leaderboard <small id="board-small"></small></h2>
+    <div class="records" id="records"></div>
+    <ol class="board" id="board-list"></ol>
+  </section>
+
+  <section class="panel ench-panel" id="ench-panel" hidden>
+    <h2>EpicLoot enchantments <small id="ench-small"></small></h2>
+    <p class="ench-intro">Every enchantment that can roll on magic equipment. X (and Y) is the value, which grows with rarity.</p>
+    <input class="search" id="ench-search" type="search" placeholder="Search an enchantment… (e.g. lifesteal, cold, trophy)" aria-label="Search an enchantment">
+    <div class="ench-filters" id="ench-filters" role="group" aria-label="Filter by item type"></div>
+    <ul class="ench-list" id="ench-list"></ul>
+    <div class="news-more" id="ench-more" hidden><button type="button" id="ench-more-btn">Show all</button></div>
+  </section>
+
+  <section class="panel map-panel" id="map-panel" hidden>
+    <h2>World map</h2>
+    <iframe class="map-frame" id="map-frame" title="World map" loading="lazy"></iframe>
+    <div class="map-actions">
+      <span class="map-note">Drag to move, scroll to zoom.</span>
+      <a class="btn-ghost" id="map-link" target="_blank" rel="noopener">Open full screen ↗</a>
+    </div>
+  </section>
+
+  <section class="panel news-panel">
+    <h2>Server news <small id="news-small"></small></h2>
+    <ul class="news" id="news-list"><li class="empty">Loading…</li></ul>
+    <div class="news-more" id="news-more" hidden><button type="button" id="news-more-btn">Show all</button></div>
+  </section>
+
+  <footer id="updated">Updates automatically</footer>
+  <footer class="credits">Powered by <a href="https://github.com/peppeaiello/valheim-status-page" id="repo-link" target="_blank" rel="noopener">valheim-status-page</a></footer>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
