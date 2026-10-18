@@ -68,6 +68,9 @@ async function loadSite() {
     $("map-link").href = site.page.map_url;
     $("map-panel").hidden = false;
   }
+  // World tab only when there is something to show in it
+  $("tab-world").hidden = site.features.world_progress === false && !site.page.map_url;
+  updateWorldEmpty();
 }
 
 // ---------- live status ----------
@@ -82,6 +85,12 @@ function renderPlayers(count, max, sessions) {
   $("players-count").textContent = `${count} / ${max || "–"}`;
   setBar("players-bar", max ? (count / max) * 100 : 0);
   $("players-small").textContent = count ? (count === 1 ? "1 online" : `${count} online`) : "";
+  const names = sessions.map((s) => s.name);
+  $("sum-players-names").textContent = names.length ? names.join(", ") : count ? `${count} online` : "nobody right now";
+  const badge = $("tab-count-players");
+  badge.hidden = !count;
+  badge.textContent = count || "";
+  badge.title = count ? `${count} online now` : "";
   $("players-list").innerHTML = sessions.length
     ? sessions.map((s) => `
         <li><span class="avatar">${esc(String(s.name).charAt(0).toUpperCase())}</span>
@@ -98,16 +107,19 @@ function renderMods() {
 }
 
 function renderRestart() {
-  const box = $("jobs");
-  if (!live.nextRestart) { box.hidden = true; $("alerts").innerHTML = ""; return; }
-  box.hidden = false;
+  const box = $("sum-restart-box");
+  if (!live.nextRestart) {
+    $("sum-restart").textContent = "–";
+    $("sum-restart-sub").textContent = "no scheduled restart";
+    box.classList.remove("soon");
+    $("alerts").innerHTML = "";
+    return;
+  }
   const left = live.nextRestart - Date.now() / 1000;
-  $("jobs-list").innerHTML = `
-    <div class="job">
-      <div class="row"><span class="title">${esc(live.restartText)}</span><span class="next">${left > 0 ? "in " + esc(fmtDuration(left)) : ""}</span></div>
-      <div class="meta"><span>The server is offline for a few minutes during the restart.</span></div>
-    </div>`;
+  $("sum-restart").textContent = left > 0 ? "in " + fmtDuration(left) : "now";
+  $("sum-restart-sub").textContent = live.restartText;
   const soon = live.online && left > 0 && left / 60 <= site.page.restart_warning_minutes;
+  box.classList.toggle("soon", soon);
   $("alerts").innerHTML = soon
     ? `<div class="alert warn">🔄 Scheduled restart in ${esc(fmtDuration(left))}: save and find a safe spot!</div>`
     : "";
@@ -158,8 +170,13 @@ function bossWhen(b) {
   return `<span class="when" title="${esc(tip)}">${esc(day)}${b.at ? `<small>${esc(fmtShortDate(b.at))}</small>` : ""}</span>`;
 }
 
+function updateWorldEmpty() {
+  $("world-empty").hidden = !$("progress-panel").hidden || !$("map-panel").hidden;
+}
+
 function renderWorld(w) {
   $("progress-panel").hidden = !w;
+  updateWorldEmpty();
   if (!w) return;
   $("world-day").textContent = w.day;
   $("world-saved").textContent = w.saved_at ? `last save: ${fmtAgo(Date.now() / 1000 - w.saved_at)}` : "";
@@ -168,6 +185,10 @@ function renderWorld(w) {
   $("bosses-count").textContent = `${done} / ${bosses.length}`;
   setBar("bosses-bar", bosses.length ? (done / bosses.length) * 100 : 0);
   const next = bosses.find((b) => !b.defeated);
+  $("sum-day").textContent = w.day;
+  $("sum-bosses").textContent = `${done}/${bosses.length}`;
+  setBar("sum-bosses-bar", bosses.length ? (done / bosses.length) * 100 : 0);
+  $("sum-next-boss").textContent = next ? ` · next: ${next.name}` : bosses.length ? " · all defeated!" : "";
   $("next-boss").innerHTML = next
     ? `Next target: <strong>${esc(next.name)}</strong>${next.biome ? ` · ${esc(next.biome)}` : ""}`
     : "All bosses defeated. Skål!";
@@ -213,7 +234,7 @@ async function refreshStats() {
   const s = await getJSON("data/stats.json");
   if (!s) return;
   stats = s;
-  if (s.world_name) $("world").textContent = s.world_name;
+  if (s.world_name) $("world-name").textContent = s.world_name;
   renderWorld(s.world);
   renderBoard();
 }
@@ -222,7 +243,28 @@ async function refreshStats() {
 const NEWS_SHOWN = 5;
 const CHANGE_ICONS = { add: "+", remove: "−", update: "↑", game: "★" };
 const TAGS = { announcement: ["Announcement", "annuncio"], mods: ["Mods", ""], settings: ["Settings", "config"], boss: ["Boss", "boss"] };
-let newsAll = [], newsExpanded = false;
+// News filters: label and the kinds they group
+const NEWS_FILTERS = [
+  { key: "", label: "All" },
+  { key: "announcement", label: "Announcements" },
+  { key: "mods", label: "Mods" },
+  { key: "settings", label: "Settings" },
+  { key: "boss", label: "Bosses" },
+];
+let newsAll = [], newsExpanded = false, newsKind = "";
+const newsMatches = (n, key) => !key || n.kind === key;
+
+function renderNewsFilters() {
+  const box = $("news-filters");
+  const avail = NEWS_FILTERS.filter((f) => !f.key || newsAll.some((n) => newsMatches(n, f.key)));
+  if (avail.length <= 2) { box.hidden = true; newsKind = ""; return; }
+  if (!avail.some((f) => f.key === newsKind)) newsKind = "";
+  box.hidden = false;
+  box.innerHTML = avail.map((f) => {
+    const n = newsAll.filter((x) => newsMatches(x, f.key)).length;
+    return `<button type="button" class="chip-btn${f.key === newsKind ? " active" : ""}" data-kind="${esc(f.key)}" aria-pressed="${f.key === newsKind}">${esc(f.label)} <span class="n">${n}</span></button>`;
+  }).join("");
+}
 
 // Announcement text: blank-line separated blocks, "Title:" first line, "- " bullet lines
 function formatText(text) {
@@ -244,8 +286,9 @@ function formatText(text) {
 
 function renderNews() {
   const list = $("news-list");
-  if (!newsAll.length) { list.innerHTML = `<li class="empty">No news yet.</li>`; $("news-more").hidden = true; return; }
-  const shown = newsExpanded ? newsAll : newsAll.slice(0, NEWS_SHOWN);
+  const filtered = newsAll.filter((n) => newsMatches(n, newsKind));
+  if (!filtered.length) { list.innerHTML = `<li class="empty">No news yet.</li>`; $("news-more").hidden = true; return; }
+  const shown = newsExpanded ? filtered : filtered.slice(0, NEWS_SHOWN);
   list.innerHTML = shown.map((n) => {
     const d = new Date(n.date);
     const day = d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
@@ -258,12 +301,13 @@ function renderNews() {
       <div><div class="news-title">${esc(n.title)} ${tag}</div>${n.text ? `<div class="news-text">${formatText(n.text)}</div>` : ""}${items ? `<ul class="changes">${items}</ul>` : ""}</div>
     </li>`;
   }).join("");
-  $("news-more").hidden = newsAll.length <= NEWS_SHOWN || newsExpanded;
+  $("news-more").hidden = filtered.length <= NEWS_SHOWN || newsExpanded;
 }
 
 async function refreshNews() {
   const n = await getJSON("data/news.json");
   newsAll = (n && n.entries) || [];
+  renderNewsFilters();
   renderNews();
 }
 
@@ -288,7 +332,7 @@ function renderEnch() {
 
 function renderEnchFilters() {
   $("ench-filters").innerHTML = ["", ...ENCH_TYPES].map((t) =>
-    `<button type="button" class="chip-btn${t === enchType ? " active" : ""}" data-type="${esc(t)}">${esc(t || "all")}</button>`).join("");
+    `<button type="button" class="chip-btn${t === enchType ? " active" : ""}" data-type="${esc(t)}" aria-pressed="${t === enchType}">${esc(t || "all")}</button>`).join("");
 }
 
 async function loadEnch() {
@@ -296,13 +340,95 @@ async function loadEnch() {
   if (!d || !(d.effects || []).length) return;
   enchAll = d.effects;
   $("ench-panel").hidden = false;
+  $("tab-mods-long").textContent = "Mods & Enchantments";
   renderEnchFilters();
   renderEnch();
+}
+
+// ---------- tabs and collapsible panels ----------
+// The chosen tab stays in the address (#world, #players…) and in the browser for the next visit
+const TABS = ["news", "world", "players", "mods"];
+const DEFAULT_TAB = "news";
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage not available */ } },
+};
+
+const tabAvailable = (name) => TABS.includes(name) && !$("tab-" + name).hidden;
+
+function tabFromHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  return TABS.includes(h) ? h : null;
+}
+
+// scroll: "auto" brings the start of the tab into view only if the page was scrolled past the tabs,
+// "always" goes there anyway (used by the summary cards)
+function showTab(name, scroll) {
+  if (!tabAvailable(name)) name = DEFAULT_TAB;
+  for (const t of TABS) {
+    const on = t === name;
+    $(t).hidden = !on;
+    const b = $("tab-" + t);
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+    b.tabIndex = on ? 0 : -1;
+  }
+  store.set("vsp.tab", name);
+  if (scroll) {
+    const top = $("tabs").getBoundingClientRect().top + window.scrollY;
+    if (scroll === "always" || window.scrollY > top) window.scrollTo({ top, behavior: "auto" });
+  }
+}
+
+function goTab(name, scroll) {
+  if (!tabAvailable(name)) return;
+  if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+  showTab(name, scroll);
+}
+
+function initTabs() {
+  $("tabs").addEventListener("click", (ev) => {
+    const a = ev.target.closest("[data-tab]");
+    if (!a) return;
+    ev.preventDefault();
+    goTab(a.dataset.tab, "auto");
+  });
+  $("tabs").addEventListener("keydown", (ev) => {
+    if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
+    const tabs = TABS.filter(tabAvailable);
+    const cur = tabs.findIndex((t) => $("tab-" + t).classList.contains("active"));
+    const next = tabs[(cur + (ev.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    ev.preventDefault();
+    goTab(next, "auto");
+    $("tab-" + next).focus();
+  });
+  document.querySelectorAll("[data-goto]").forEach((a) => a.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    goTab(a.dataset.goto, "always");
+  }));
+  window.addEventListener("hashchange", () => { const t = tabFromHash(); if (t) showTab(t, "always"); });
+  showTab(tabFromHash() || store.get("vsp.tab") || DEFAULT_TAB);
+
+  // Long sections (mods, enchantments) can be collapsed: the state is remembered
+  document.querySelectorAll("details[data-fold]").forEach((d) => {
+    const key = "vsp.fold." + d.dataset.fold;
+    const saved = store.get(key);
+    if (saved !== null) d.open = saved === "1";
+    d.addEventListener("toggle", () => store.set(key, d.open ? "1" : "0"));
+  });
 }
 
 // ---------- start ----------
 $("mod-search").addEventListener("input", renderMods);
 $("news-more-btn").addEventListener("click", () => { newsExpanded = true; renderNews(); });
+$("news-filters").addEventListener("click", (ev) => {
+  const b = ev.target.closest("button[data-kind]");
+  if (!b) return;
+  newsKind = b.dataset.kind;
+  newsExpanded = false;
+  renderNewsFilters();
+  renderNews();
+});
 $("ench-search").addEventListener("input", renderEnch);
 $("ench-more-btn").addEventListener("click", () => { enchExpanded = true; renderEnch(); });
 $("ench-filters").addEventListener("click", (ev) => {
@@ -314,7 +440,10 @@ $("ench-filters").addEventListener("click", (ev) => {
 });
 
 (async () => {
+  initTabs();
   await loadSite();
+  // the World tab may have been turned off by the site settings
+  if (!tabAvailable(tabFromHash() || store.get("vsp.tab") || DEFAULT_TAB)) showTab(DEFAULT_TAB);
   refreshStatus(); refreshStats(); refreshNews(); loadEnch();
   setInterval(refreshStatus, site.page.refresh_seconds * 1000);
   setInterval(refreshStats, 60 * 1000);

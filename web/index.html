@@ -4,108 +4,146 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Valheim server status</title>
+<meta name="theme-color" content="#0d1013">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script>document.documentElement.classList.add("js");</script>
 </head>
 <body>
 <div class="wrap">
 
-  <header>
-    <div class="runes">ᚹ ᚨ ᛚ ᚺ ᛖ ᛁ ᛗ</div>
-    <h1 id="server-name">Valheim</h1>
-    <div class="subtitle" id="subtitle">Valheim dedicated server</div>
-    <div id="pill" class="status-pill"><span class="dot"></span><span id="pill-text">Checking…</span></div>
-    <div class="join-hint" id="join-hint" hidden></div>
+  <header class="top">
+    <div class="brand">
+      <div class="runes" aria-hidden="true">ᚹ ᚨ ᛚ ᚺ ᛖ ᛁ ᛗ</div>
+      <h1 id="server-name">Valheim</h1>
+      <div class="subtitle" id="subtitle">Valheim dedicated server</div>
+      <div class="join-hint" id="join-hint" hidden></div>
+    </div>
+    <div id="pill" class="status-pill" role="status"><span class="dot"></span><span id="pill-text">Checking…</span></div>
   </header>
 
-  <section class="alerts" id="alerts"></section>
+  <section class="alerts" id="alerts" aria-live="polite"></section>
 
-  <section class="stats">
-    <div class="stat">
-      <div class="label">Players</div>
+  <!-- At a glance: the main facts, always visible -->
+  <section class="summary" aria-label="Server summary">
+    <a class="stat link" href="#players" data-goto="players">
+      <div class="label">Players online</div>
       <div class="value" id="players-count">–</div>
       <div class="bar"><span id="players-bar"></span></div>
+      <div class="sub ellipsis" id="sum-players-names">&nbsp;</div>
+    </a>
+    <div class="stat" id="sum-restart-box" title="The server is offline for a few minutes during the restart.">
+      <div class="label">Next restart</div>
+      <div class="value" id="sum-restart">–</div>
+      <div class="sub" id="sum-restart-sub">&nbsp;</div>
     </div>
-    <div class="stat">
-      <div class="label">World</div>
-      <div class="value" id="world">–</div>
-    </div>
-    <div class="stat">
-      <div class="label">Version</div>
-      <div class="value" id="version">–</div>
-    </div>
-    <div class="stat">
+    <a class="stat link" href="#world" data-goto="world">
+      <div class="label">World · <span id="world-name">–</span></div>
+      <div class="value">Day <span id="sum-day">–</span></div>
+      <div class="bar"><span id="sum-bosses-bar"></span></div>
+      <div class="sub"><span id="sum-bosses">–</span> bosses<span id="sum-next-boss"></span></div>
+    </a>
+    <a class="stat link" href="#mods" data-goto="mods">
       <div class="label">Mods</div>
       <div class="value" id="mods-count">–</div>
+      <div class="sub">Valheim <span id="version">–</span></div>
+    </a>
+  </section>
+
+  <!-- Tabs: they stay at the top while scrolling -->
+  <nav class="tabs" id="tabs" aria-label="Page sections">
+    <div class="tabs-inner" role="tablist">
+      <a role="tab" class="tab" id="tab-news" href="#news" data-tab="news" aria-controls="news">News</a>
+      <a role="tab" class="tab" id="tab-world" href="#world" data-tab="world" aria-controls="world">World</a>
+      <a role="tab" class="tab" id="tab-players" href="#players" data-tab="players" aria-controls="players">Players<span class="count" id="tab-count-players" hidden></span></a>
+      <a role="tab" class="tab" id="tab-mods" href="#mods" data-tab="mods" aria-controls="mods"><span class="long" id="tab-mods-long">Mods</span><span class="short">Mods</span></a>
     </div>
-  </section>
+  </nav>
 
-  <section class="panel progress-panel" id="progress-panel" hidden>
-    <h2>World progression <small id="world-saved"></small></h2>
-    <div class="progress-top">
-      <div class="day-box">
-        <div class="label">Day</div>
-        <div class="day" id="world-day">–</div>
-      </div>
-      <div class="progress-sum">
-        <div class="progress-line"><strong id="bosses-count">–</strong> bosses defeated</div>
-        <div class="bar"><span id="bosses-bar"></span></div>
-        <div class="next-boss" id="next-boss"></div>
-      </div>
-    </div>
-    <ol class="bosses" id="bosses-list"></ol>
-    <div class="milestones" id="milestones"></div>
-  </section>
+  <main>
 
-  <section class="grid">
-    <div class="panel">
-      <h2>Vikings online <small id="players-small"></small></h2>
-      <ul class="players" id="players-list"><li class="empty">Nobody right now</li></ul>
+    <!-- ===== News ===== -->
+    <section class="tab-panel" id="news" role="tabpanel" aria-labelledby="tab-news">
+      <section class="panel news-panel">
+        <h2>Server news <small id="news-small"></small></h2>
+        <div class="chips" id="news-filters" role="group" aria-label="Filter the news" hidden></div>
+        <ul class="news" id="news-list"><li class="empty">Loading…</li></ul>
+        <div class="news-more" id="news-more" hidden><button type="button" id="news-more-btn">Show all</button></div>
+      </section>
+    </section>
 
-      <div class="jobs" id="jobs" hidden>
-        <h2>Next restart</h2>
-        <div id="jobs-list"></div>
-      </div>
-    </div>
+    <!-- ===== World ===== -->
+    <section class="tab-panel" id="world" role="tabpanel" aria-labelledby="tab-world">
+      <section class="panel progress-panel" id="progress-panel" hidden>
+        <h2>World progression <small id="world-saved"></small></h2>
+        <div class="progress-top">
+          <div class="day-box">
+            <div class="label">Day</div>
+            <div class="day" id="world-day">–</div>
+          </div>
+          <div class="progress-sum">
+            <div class="progress-line"><strong id="bosses-count">–</strong> bosses defeated</div>
+            <div class="bar"><span id="bosses-bar"></span></div>
+            <div class="next-boss" id="next-boss"></div>
+          </div>
+        </div>
+        <ol class="bosses" id="bosses-list"></ol>
+        <div class="milestones" id="milestones"></div>
+      </section>
 
-    <div class="panel">
-      <h2>Installed mods <small id="mods-small"></small></h2>
-      <input class="search" id="mod-search" type="search" placeholder="Search a mod…" aria-label="Search a mod">
-      <ul class="mods" id="mods-list"></ul>
-    </div>
-  </section>
+      <section class="panel map-panel" id="map-panel" hidden>
+        <h2>World map</h2>
+        <iframe class="map-frame" id="map-frame" title="World map" loading="lazy"></iframe>
+        <div class="map-actions">
+          <span class="map-note">Drag to move, scroll to zoom.</span>
+          <a class="btn-ghost" id="map-link" target="_blank" rel="noopener">Open full screen ↗</a>
+        </div>
+      </section>
 
-  <section class="panel board-panel" id="board-panel" hidden>
-    <h2>Leaderboard <small id="board-small"></small></h2>
-    <div class="records" id="records"></div>
-    <ol class="board" id="board-list"></ol>
-  </section>
+      <section class="panel" id="world-empty">
+        <p class="empty">No world data yet.</p>
+      </section>
+    </section>
 
-  <section class="panel ench-panel" id="ench-panel" hidden>
-    <h2>EpicLoot enchantments <small id="ench-small"></small></h2>
-    <p class="ench-intro">Every enchantment that can roll on magic equipment. X (and Y) is the value, which grows with rarity.</p>
-    <input class="search" id="ench-search" type="search" placeholder="Search an enchantment… (e.g. lifesteal, cold, trophy)" aria-label="Search an enchantment">
-    <div class="ench-filters" id="ench-filters" role="group" aria-label="Filter by item type"></div>
-    <ul class="ench-list" id="ench-list"></ul>
-    <div class="news-more" id="ench-more" hidden><button type="button" id="ench-more-btn">Show all</button></div>
-  </section>
+    <!-- ===== Players ===== -->
+    <section class="tab-panel" id="players" role="tabpanel" aria-labelledby="tab-players">
+      <section class="panel">
+        <h2>Vikings online <small id="players-small"></small></h2>
+        <ul class="players" id="players-list"><li class="empty">Nobody right now</li></ul>
+      </section>
 
-  <section class="panel map-panel" id="map-panel" hidden>
-    <h2>World map</h2>
-    <iframe class="map-frame" id="map-frame" title="World map" loading="lazy"></iframe>
-    <div class="map-actions">
-      <span class="map-note">Drag to move, scroll to zoom.</span>
-      <a class="btn-ghost" id="map-link" target="_blank" rel="noopener">Open full screen ↗</a>
-    </div>
-  </section>
+      <section class="panel board-panel" id="board-panel" hidden>
+        <h2>Leaderboard <small id="board-small"></small></h2>
+        <div class="records" id="records"></div>
+        <ol class="board" id="board-list"></ol>
+      </section>
+    </section>
 
-  <section class="panel news-panel">
-    <h2>Server news <small id="news-small"></small></h2>
-    <ul class="news" id="news-list"><li class="empty">Loading…</li></ul>
-    <div class="news-more" id="news-more" hidden><button type="button" id="news-more-btn">Show all</button></div>
-  </section>
+    <!-- ===== Mods & enchantments ===== -->
+    <section class="tab-panel" id="mods" role="tabpanel" aria-labelledby="tab-mods">
+      <details class="panel fold" id="mods-panel" data-fold="mods" open>
+        <summary><h2>Installed mods <small id="mods-small"></small></h2></summary>
+        <div class="fold-body">
+          <input class="search" id="mod-search" type="search" placeholder="Search a mod…" aria-label="Search a mod">
+          <ul class="mods" id="mods-list"></ul>
+        </div>
+      </details>
+
+      <details class="panel fold ench-panel" id="ench-panel" data-fold="ench" open hidden>
+        <summary><h2>EpicLoot enchantments <small id="ench-small"></small></h2></summary>
+        <div class="fold-body">
+          <p class="intro">Every enchantment that can roll on magic equipment. X (and Y) is the value, which grows with rarity.</p>
+          <input class="search" id="ench-search" type="search" placeholder="Search an enchantment… (e.g. lifesteal, cold, trophy)" aria-label="Search an enchantment">
+          <div class="chips" id="ench-filters" role="group" aria-label="Filter by item type"></div>
+          <ul class="ench-list" id="ench-list"></ul>
+          <div class="news-more" id="ench-more" hidden><button type="button" id="ench-more-btn">Show all</button></div>
+        </div>
+      </details>
+    </section>
+
+  </main>
 
   <footer id="updated">Updates automatically</footer>
   <footer class="credits">Powered by <a href="https://github.com/peppeaiello/valheim-status-page" id="repo-link" target="_blank" rel="noopener">valheim-status-page</a></footer>
