@@ -11,6 +11,7 @@ One small container, added next to your server, that shows your players what is 
 - **Installed mods** with search, read from the BepInEx mod list.
 - **Scheduled restart** countdown, with a warning banner when it is close.
 - **Leaderboard**: play time, sessions, last seen and record of players online together.
+- **Hall of Valhalla**: deaths read from the server log, recent falls, longest life, days in a row, and fun titles (most deaths, night owl, lone wolf, weekend warrior…).
 - **World progression** *(experimental)*: in-game day, defeated bosses with the day they fell, milestones.
 - **News feed**: mods added, removed or updated; mod settings that changed after a restart; bosses defeated; your own announcements.
 - **Discord**: new entries posted to a channel through a webhook, with the Gale profile code to import after mod changes.
@@ -82,9 +83,14 @@ The container runs nginx and a small Python worker (standard library only). The 
 | `data/status.json` | status, players, mods, next restart | 10 s |
 | `data/stats.json` | world progression, leaderboard | 1 min |
 | `data/news.json` | news feed | 1 min |
+| `data/hall.json` | Hall of Valhalla: deaths, titles, streaks | 1 min |
 | `data/enchantments.json` | EpicLoot enchantments (only if enabled) | 6 h |
 
 Its own state (play time, news, Discord history) is kept in `/data`.
+
+### About the Hall of Valhalla
+
+Deaths come from the server log, `logs/valheim_server.log` in the server folder (already mounted, nothing to add): Valheim writes `Got character ZDOID from <name> : 0:0` when a character dies. Deaths are counted from the start of the current log, so those older than the last server restart before the first run are not known. Play time by hour, weekend, alone or in a group is sampled from Huginn, in the time zone of the container (`TZ`). If your log is somewhere else, set `paths.server_log`; turn the section off with `features.hall = false`.
 
 ### About world progression
 
@@ -94,7 +100,7 @@ The save records *if* a boss was defeated, not *when*. The worker notices the ke
 
 ## Privacy
 
-The page shows player names, when they were last seen and how long they played. Make sure your players are fine with it before making the page public.
+The page shows player names, when they were last seen, how long they played and how many times they died. Make sure your players are fine with it before making the page public.
 
 ## License
 

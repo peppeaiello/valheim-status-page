@@ -119,6 +119,27 @@
         <div class="records" id="records"></div>
         <ol class="board" id="board-list"></ol>
       </section>
+
+      <section class="panel hall-panel" id="hall-panel" hidden>
+        <h2>Hall of Valhalla <small id="hall-small"></small></h2>
+        <p class="intro">Titles you earn (or suffer) by playing. Whoever falls in battle goes to Valhalla: here we keep count.</p>
+        <div class="titles" id="hall-titles"></div>
+        <div class="hall-cols">
+          <div>
+            <h3>Recent falls</h3>
+            <ul class="falls" id="hall-falls"></ul>
+          </div>
+          <div>
+            <h3>The record</h3>
+            <div class="table-wrap">
+              <table class="hall-table">
+                <thead><tr><th>Viking</th><th title="Deaths">💀</th><th title="Longest life (online time without dying)">Longest life</th><th title="Days in a row on the server (record)">In a row</th></tr></thead>
+                <tbody id="hall-rows"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
     </section>
 
     <!-- ===== Mods & enchantments ===== -->

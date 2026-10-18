@@ -3,13 +3,14 @@ valheim-status-page worker: keeps the JSON files the page reads up to date.
 
 Every `status_seconds`: server status and player sessions (status.json).
 Every `slow_seconds`: world progression, leaderboard, mod and settings news,
-Discord posts (stats.json, news.json). Every 6 hours: EpicLoot enchantments.
+Discord posts, Hall of Valhalla (stats.json, news.json, hall.json).
+Every 6 hours: EpicLoot enchantments.
 """
 
 import os
 import time
 
-from . import config, configwatch, discord, epicloot, huginn, news, players, world
+from . import config, configwatch, discord, epicloot, hall, huginn, news, players, world
 from .util import load_json, log, save_json
 
 
@@ -40,6 +41,8 @@ def main():
 
         if status and cfg["features"]["leaderboard"]:
             players.update(state, status["sessions"], now)
+        if cfg["features"]["hall"]:
+            hall.sample(state, set((status or {}).get("sessions", {})) if online else set(), now)
         save_json(os.path.join(web, "status.json"), {
             "updated_at": now, "reachable": reachable,
             **({k: v for k, v in status.items()} if status else {"online": False}),
@@ -71,6 +74,16 @@ def main():
                     "updated_at": now, "world_name": world_name, "world": w,
                     "leaderboard": players.export(state, reachable) if cfg["features"]["leaderboard"] else None,
                 })
+                hall_file = os.path.join(web, "hall.json")
+                h = None
+                if cfg["features"]["hall"]:
+                    log_path = paths["server_log"] or os.path.join(paths["server"], "logs", "valheim_server.log")
+                    hall.read_log(state, log_path, now)
+                    h = hall.export(state, now)
+                if h:
+                    save_json(hall_file, h)
+                elif os.path.exists(hall_file):
+                    os.remove(hall_file)            # section turned off: hide it
                 feed = news.feed(state, paths["announcements"])
                 save_json(os.path.join(web, "news.json"), {"updated_at": now, "entries": feed})
                 discord.run(state, cfg, feed)

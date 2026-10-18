@@ -239,6 +239,50 @@ async function refreshStats() {
   renderBoard();
 }
 
+// ---------- Hall of Valhalla ----------
+const HALL_ICONS = { valhalla: "💀", immortal: "🛡️", streak: "🔥", night: "🦉", dawn: "🐓",
+  solo: "🐺", pack: "🍻", risen: "🧟", weekend: "🪓" };
+
+function hallValue(t) {
+  if (t.key === "valhalla") return `${t.value} ${t.value === 1 ? "death" : "deaths"}`;
+  if (t.key === "streak") return `${t.value} days`;
+  if (t.key === "risen") return `${t.value} deaths in one session`;
+  return fmtPlayed(t.value);
+}
+
+function renderHall(h) {
+  $("hall-panel").hidden = !(h && (h.players || []).length);
+  if ($("hall-panel").hidden) return;
+  const now = Date.now() / 1000;
+  $("hall-small").textContent = h.since ? `since ${fmtShortDate(h.since)}` : "";
+  const titles = h.titles || [];
+  $("hall-titles").innerHTML = titles.length
+    ? titles.map((t) => `
+      <div class="title-card">
+        <span class="icon" aria-hidden="true">${HALL_ICONS[t.key] || "⚔️"}</span>
+        <span class="tname">${esc(t.title)}</span>
+        <span class="holder">${t.names.map(esc).join(", ")}</span>
+        <span class="why">${esc(t.why)} · ${esc(hallValue(t))}</span>
+      </div>`).join("")
+    : `<p class="empty">No titles yet: they are earned by playing.</p>`;
+  const falls = h.recent || [];
+  $("hall-falls").innerHTML = falls.length
+    ? falls.map((f) => `<li><span class="pname">${esc(f.name)}</span> fell in battle <span class="ago">${esc(fmtAgo(now - f.at))}</span></li>`).join("")
+    : `<li class="empty">Nobody has fallen so far. So far.</li>`;
+  const rows = [...h.players].sort((a, b) => b.deaths - a.deaths || b.life - a.life);
+  $("hall-rows").innerHTML = rows.map((p) => `
+    <tr>
+      <td>${esc(p.name)}${p.online ? ` <span class="on" title="Online now">●</span>` : ""}</td>
+      <td>${p.deaths}</td>
+      <td>${p.life >= 60 ? esc(fmtPlayed(p.life)) : "—"}</td>
+      <td>${p.streak ? `${p.streak} ${p.streak === 1 ? "day" : "days"}${p.streak_now > 1 ? ` <small>(now: ${p.streak_now})</small>` : ""}` : "—"}</td>
+    </tr>`).join("");
+}
+
+async function refreshHall() {
+  renderHall(await getJSON("data/hall.json"));
+}
+
 // ---------- news ----------
 const NEWS_SHOWN = 5;
 const CHANGE_ICONS = { add: "+", remove: "−", update: "↑", game: "★" };
@@ -444,9 +488,10 @@ $("ench-filters").addEventListener("click", (ev) => {
   await loadSite();
   // the World tab may have been turned off by the site settings
   if (!tabAvailable(tabFromHash() || store.get("vsp.tab") || DEFAULT_TAB)) showTab(DEFAULT_TAB);
-  refreshStatus(); refreshStats(); refreshNews(); loadEnch();
+  refreshStatus(); refreshStats(); refreshNews(); refreshHall(); loadEnch();
   setInterval(refreshStatus, site.page.refresh_seconds * 1000);
   setInterval(refreshStats, 60 * 1000);
+  setInterval(refreshHall, 60 * 1000);
   setInterval(refreshNews, 2 * 60 * 1000);
   setInterval(tick, 1000);
   setInterval(renderRestart, 30 * 1000);

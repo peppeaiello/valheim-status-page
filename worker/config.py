@@ -16,6 +16,8 @@ DEFAULTS = {
         "server": "/valheim/server",      # /home/steam/valheim
         "saves": "/valheim/saves",        # /home/steam/.config/unity3d/IronGate/Valheim
         "backups": "/valheim/backups",    # /home/steam/backups (optional)
+        # Server log, for the deaths in the Hall of Valhalla. Empty = <server>/logs/valheim_server.log
+        "server_log": "",
         # Writable: state of the worker, and the JSON files served to the page.
         "data": "/data",
         "web_data": "/usr/share/nginx/html/data",
@@ -32,6 +34,7 @@ DEFAULTS = {
     },
     "features": {
         "leaderboard": True,              # play time per player, from Huginn sessions
+        "hall": True,                     # Hall of Valhalla: deaths (from the server log), titles and streaks
         "world_progress": True,           # day, bosses, milestones, read from the world save (experimental)
         "boss_dates_from_backups": True,  # date bosses defeated before the first run, using backups
         "mod_news": True,                 # news entry when mods or the Valheim version change

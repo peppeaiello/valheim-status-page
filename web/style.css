@@ -321,6 +321,31 @@ html:not(.js) .tab-panel + .tab-panel { margin-top: var(--gap); }
 .board .meta { display: flex; justify-content: space-between; gap: 2px 10px; flex-wrap: wrap; color: var(--muted); font-size: 12.5px; margin-top: 5px; }
 .board .on { color: var(--ok); }
 
+/* ====== Hall of Valhalla ====== */
+.titles { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.titles .empty { font-size: 14px; margin: 0; }
+.title-card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px; padding: 14px 10px;
+  border-radius: 12px; background: rgba(201,162,90,0.07); border: 1px solid rgba(201,162,90,0.3); min-width: 0;
+}
+.title-card .icon { font-size: 26px; line-height: 1.2; }
+.title-card .tname { font-family: "Cinzel", serif; font-weight: 600; font-size: 15px; color: var(--gold-soft); }
+.title-card .holder { font-weight: 600; overflow-wrap: anywhere; }
+.title-card .why { color: var(--muted); font-size: 12.5px; }
+.hall-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 18px; }
+.falls { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.falls li { padding: 8px 12px; border-radius: var(--radius-sm); background: var(--inset); border: 1px solid var(--inset-line); overflow-wrap: anywhere; }
+.falls li.empty { background: none; border: 0; }
+.falls .pname { font-weight: 600; }
+.falls .ago { color: var(--muted); font-size: 12.5px; margin-left: 4px; }
+.table-wrap { overflow-x: auto; }
+.hall-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.hall-table th { color: var(--muted); font-weight: 500; font-size: 12.5px; text-align: left; padding: 0 8px 6px; border-bottom: 1px solid var(--line); }
+.hall-table td { padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.hall-table tbody tr:hover td { background: rgba(255,255,255,0.025); }
+.hall-table td small { color: var(--muted); }
+.hall-table .on { color: var(--ok); font-size: 11px; }
+
 /* ====== EpicLoot enchantments ====== */
 .ench-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .ench-list li:not(.empty) {
@@ -342,6 +367,11 @@ footer.credits { margin-top: 6px; font-size: 12px; }
   .mods { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .ench-list { grid-template-columns: 1fr; }
   .map-frame { height: 440px; }
+}
+
+@media (max-width: 720px) {
+  .hall-cols { grid-template-columns: 1fr; }
+  .hall-table th, .hall-table td { padding-left: 4px; padding-right: 4px; }
 }
 
 /* ====== Phones ====== */

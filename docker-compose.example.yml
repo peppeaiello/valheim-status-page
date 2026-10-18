@@ -25,7 +25,7 @@ services:
     volumes:
       # The server's files, read-only: the status page never changes your server
       - ./valheim/saves:/valheim/saves:ro
-      - ./valheim/server:/valheim/server:ro
+      - ./valheim/server:/valheim/server:ro       # also logs/valheim_server.log, for the Hall of Valhalla
       - ./valheim/backups:/valheim/backups:ro
       # Your config.toml and announcements.json
       - ./status-page/config:/config:ro

@@ -25,6 +25,7 @@ restart_warning_minutes = 30
 
 [features]
 leaderboard = true              # play time per player, from Huginn sessions
+hall = true                     # Hall of Valhalla: deaths from the server log, titles and streaks
 world_progress = true           # in-game day, bosses and milestones from the world save (experimental)
 boss_dates_from_backups = true  # date bosses defeated before the first run, using /valheim/backups
 mod_news = true                 # news when mods or the Valheim version change
@@ -40,6 +41,10 @@ post = ["announcement", "mods", "settings", "boss"]
 # Gale profile code to show after mod changes. Empty = read it from the
 # GALE_SYNC_CODE download of mbround18/valheim, if you use it.
 gale_code = ""
+
+# [paths]
+# Server log for the Hall of Valhalla. Empty = /valheim/server/logs/valheim_server.log
+# server_log = ""
 
 # Mod settings to watch. After each restart, changed values are listed in the news.
 # file: name of the .cfg in BepInEx/config, section: the [Section] without brackets.
