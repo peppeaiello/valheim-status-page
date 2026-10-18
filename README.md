@@ -15,7 +15,7 @@ One small container, added next to your server, that shows your players what is 
 - **News feed**: mods added, removed or updated; mod settings that changed after a restart; bosses defeated; your own announcements.
 - **Discord**: new entries posted to a channel through a webhook, with the Gale profile code to import after mod changes.
 - **EpicLoot enchantments** *(optional, off by default)*: if your server runs EpicLoot, you can show every enchantment with its official description and the items it can roll on, with search and filters. Turn it on with `features.epicloot = true`.
-- **World map**: embed your map (e.g. ValheimWebMap) if you have one.
+- **World map**: embed your map (e.g. ValheimWebMap) if you have one. The [ServerSideMap](https://thunderstore.io/c/valheim/p/Mydayyy/ServerSideMap/) mod is recommended, so the explored areas are kept on the server and shared by all players.
 
 Everything is read-only: the status page never changes your server's files.
 
@@ -24,6 +24,7 @@ Everything is read-only: the status page never changes your server's files.
 - A server running the **mbround18/valheim** image, with its **Huginn** status server (it is built in, HTTP port 3000 by default).
   Huginn reports statistics only when the server is public (`PUBLIC=1`).
 - Docker with Compose.
+- Recommended for the world map: the [ServerSideMap](https://thunderstore.io/c/valheim/p/Mydayyy/ServerSideMap/) mod.
 - Optional: BepInEx mods, Gale profile sync (`GALE_SYNC_CODE`), backups (`/home/steam/backups` mounted).
 
 ## Quick start

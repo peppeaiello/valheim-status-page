@@ -17,6 +17,7 @@ subtitle = "Valheim dedicated server"
 # Optional text under the online/offline badge, e.g. how to join.
 join_hint = ""
 # Optional map (e.g. ValheimWebMap) shown in an iframe. Must be reachable by your visitors.
+# The ServerSideMap mod is recommended: https://thunderstore.io/c/valheim/p/Mydayyy/ServerSideMap/
 map_url = ""
 refresh_seconds = 15
 # Show a warning banner when the scheduled restart is this close.
